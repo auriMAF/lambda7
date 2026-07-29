@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PAMPA — Plataforma de gestión de precomisionado y comisionado | LAMBDA7</title>
+<meta name="description" content="PAMPA: plataforma de gestión de precomisionado y comisionado por sistemas y subsistemas. Planillas digitales, códigos QR, punch lists, certificados y avance en tiempo real." />
+<script src="./ds-base.js"></script>
+<style>
+/* Mismos tokens de marca que la home de LAMBDA7 */
+:root {
+  --color-bg: #0a0f1e;
+  --color-surface: #101830;
+  --color-surface-2: #141d38;
+  --color-text: #eef2f7;
+  --color-divider: color-mix(in srgb, #ffffff 14%, transparent);
+  --color-divider-strong: color-mix(in srgb, #ffffff 24%, transparent);
+
+  --color-accent: #35b8ab;
+  --color-accent-100: #e4f8f5;
+  --color-accent-200: #b9ece4;
+  --color-accent-300: #8ddccf;
+  --color-accent-400: #5fcabb;
+  --color-accent-500: #35b8ab;
+  --color-accent-600: #279488;
+  --color-accent-700: #1e756c;
+  --color-accent-800: #164f49;
+  --color-accent-900: #0d2f2c;
+  --color-accent-2-100: #e4f8f5;
+  --color-accent-2-700: #1e756c;
+  --color-accent-2-800: #164f49;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.45);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.5);
+  --shadow-lg: 0 20px 48px rgba(0,0,0,0.6);
+
+  --leading: 24px;
+  --half: 12px;
+  --edge: clamp(20px, 5vw, 72px);
+  --measure: 62ch;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; text-wrap: pretty; }
+a { color: var(--color-accent-300); }
+a:hover { color: var(--color-accent-200); }
+.btn { white-space: nowrap; }
+.btn-ghost { padding-inline: var(--space-3); border-color: var(--color-divider); }
+.tag-accent, .tag-accent-2 { background: color-mix(in srgb, var(--color-accent) 16%, transparent); color: var(--color-accent-200); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--edge); }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+/* corner marks */
+.corner { position: absolute; width: 15px; height: 15px; color: color-mix(in srgb, var(--color-text) 45%, transparent); pointer-events: none; }
+.corner::before { content: ""; position: absolute; left: 7px; top: 0; width: 1px; height: 100%; background: currentColor; }
+.corner::after { content: ""; position: absolute; top: 7px; left: 0; width: 100%; height: 1px; background: currentColor; }
+.corner.tl { top: -8px; left: -8px; } .corner.tr { top: -8px; right: -8px; }
+.corner.bl { bottom: -8px; left: -8px; } .corner.br { bottom: -8px; right: -8px; }
+
+/* nav */
+.topnav { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--color-bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-divider); }
+.topnav .nav { padding-inline: max(var(--edge), calc((100% - 1200px) / 2 + var(--edge))); gap: var(--space-6); }
+.brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--color-accent); color: var(--color-accent); font-family: var(--font-heading); font-weight: 600; font-size: 17px; flex: none; }
+.brand-row { display: flex; align-items: center; gap: 10px; margin-right: auto; text-decoration: none; color: inherit; }
+.brand-row .nav-brand { margin: 0; letter-spacing: 0.02em; }
+.brand-row .sep { color: color-mix(in srgb, var(--color-text) 30%, transparent); }
+.brand-row .prod { font-family: var(--font-heading); font-weight: 600; font-size: 16px; letter-spacing: 0.14em; color: var(--color-accent-300); }
+.nav-cta { display: flex; align-items: center; gap: var(--space-3); }
+
+/* kicker / titles */
+.kicker { display: block; font-size: 13px; line-height: var(--half); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--color-accent-300); margin: 0 0 var(--half); }
+.caption-rule { height: 1px; border: 0; margin: 0 0 calc(var(--leading) - var(--half)); background: var(--color-divider); }
+.section-title { font-family: var(--font-heading); font-weight: 600; font-size: clamp(26px, 3.2vw, 38px); text-transform: uppercase; letter-spacing: 0.01em; margin: 0 0 var(--half); max-width: 26ch; }
+.section-sub { font-size: 16px; line-height: var(--leading); max-width: var(--measure); color: color-mix(in srgb, var(--color-text) 82%, transparent); margin: 0; }
+
+/* hero */
+.hero { padding: calc(3 * var(--leading)) 0 calc(2 * var(--leading)); }
+.hero .eyebrow { display: inline-block; border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent); background: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent-200); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; padding: 5px 12px; margin-bottom: var(--leading); }
+.display { font-family: var(--font-heading); font-weight: 600; font-size: clamp(38px, 5.6vw, 68px); line-height: 1.04; letter-spacing: 0.005em; text-transform: uppercase; margin: 0; max-width: 24ch; }
+.display .accent { color: var(--color-accent-300); }
+.hero .lede { font-size: 17px; line-height: var(--leading); max-width: var(--measure); margin: var(--leading) 0 0; color: color-mix(in srgb, var(--color-text) 85%, transparent); }
+.hero .expand { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin: var(--half) 0 0; }
+.hero .row { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--leading); }
+
+/* flow de fases */
+.flow { display: flex; gap: var(--half); margin-top: calc(2 * var(--leading)); }
+.phase { position: relative; flex: 1; min-width: 0; border: 1px solid var(--color-divider); padding: var(--leading) var(--half) var(--half); display: flex; flex-direction: column; }
+.phase .code { align-self: flex-start; display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--color-accent); color: var(--color-accent-200); font-family: var(--font-heading); font-weight: 600; font-size: 15px; margin-bottom: var(--half); }
+.phase .name { font-family: var(--font-heading); font-weight: 600; font-size: 18px; text-transform: uppercase; margin-bottom: 6px; }
+.phase .desc { font-size: 13px; line-height: 1.45; color: color-mix(in srgb, var(--color-text) 75%, transparent); flex: 1; }
+.phase .gate { margin-top: var(--half); padding-top: 9px; border-top: 1px dashed var(--color-divider); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent-300); }
+.flow-arrow { flex: none; align-self: center; color: color-mix(in srgb, var(--color-text) 40%, transparent); }
+@media (max-width: 880px) { .flow { flex-direction: column; } .flow-arrow { transform: rotate(90deg); } }
+
+/* capacidades */
+.section { padding: calc(3 * var(--leading)) 0; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); margin-top: calc(1.5 * var(--leading)); }
+.cell { position: relative; min-width: 0; border: 1px solid var(--color-divider); padding: var(--leading); }
+.cell .icon { color: var(--color-accent); margin-bottom: var(--half); display: block; }
+.cell h3 { font-family: var(--font-heading); font-weight: 600; font-size: 19px; text-transform: uppercase; margin: 0 0 8px; }
+.cell p { font-size: 14px; line-height: var(--leading); margin: 0; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+@media (max-width: 880px) { .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid3 { grid-template-columns: minmax(0, 1fr); } }
+
+/* workflow */
+.workflow { position: relative; display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: center; border: 1px solid var(--color-divider); background: var(--color-surface); padding: var(--leading); margin-top: calc(1.5 * var(--leading)); }
+.qr-frame { border: 1px solid var(--color-divider-strong); padding: var(--half); background: color-mix(in srgb, var(--color-bg) 60%, transparent); }
+.qr-mock { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.qr-mock span { aspect-ratio: 1; background: color-mix(in srgb, var(--color-text) 10%, transparent); }
+.qr-mock span.on { background: var(--color-accent-300); }
+.wf-steps { display: flex; flex-direction: column; gap: var(--half); }
+.wf-steps .row { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: var(--half); }
+.wf-steps .n { width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--color-accent) 50%, transparent); color: var(--color-accent-300); font-family: var(--font-heading); font-weight: 600; font-size: 13px; }
+.wf-steps .t { font-family: var(--font-heading); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.02em; }
+.wf-steps .d { font-size: 13px; line-height: 1.5; color: color-mix(in srgb, var(--color-text) 75%, transparent); margin-top: 2px; }
+@media (max-width: 720px) { .workflow { grid-template-columns: minmax(0, 1fr); } .qr-frame { max-width: 168px; } }
+
+/* chips de códigos */
+.idrow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--half); margin-top: var(--half); }
+.idchip { min-width: 0; border: 1px solid var(--color-divider); padding: var(--half); display: flex; gap: 10px; align-items: flex-start; }
+.idchip .sw { width: 8px; height: 8px; flex: none; margin-top: 5px; background: var(--color-accent); }
+.idchip .lbl { display: block; font-family: var(--font-heading); font-weight: 600; font-size: 15px; letter-spacing: 0.08em; }
+.idchip .sub { display: block; font-size: 12px; color: color-mix(in srgb, var(--color-text) 65%, transparent); margin-top: 2px; }
+@media (max-width: 720px) { .idrow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* stats */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); margin-top: calc(2 * var(--leading)); }
+.stat { min-width: 0; border-top: 2px solid var(--color-accent); padding-top: var(--half); }
+.stat .num { font-family: var(--font-heading); font-weight: 600; font-size: clamp(34px, 4.5vw, 52px); line-height: 1; }
+.stat .lbl { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: 6px; }
+@media (max-width: 560px) { .stats { grid-template-columns: minmax(0, 1fr); } }
+
+/* descarga */
+.download { position: relative; border: 1px solid var(--color-divider); background: var(--color-surface); padding: var(--leading); display: flex; flex-wrap: wrap; gap: var(--leading); align-items: center; justify-content: space-between; margin-top: calc(1.5 * var(--leading)); }
+.download .copy { min-width: 0; }
+.download h3 { font-family: var(--font-heading); font-weight: 600; font-size: 22px; text-transform: uppercase; margin: 0 0 6px; }
+.download p { font-size: 14px; line-height: var(--leading); margin: 0; color: color-mix(in srgb, var(--color-text) 75%, transparent); max-width: 52ch; }
+.download .meta { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-top: 8px; }
+.download a.btn { text-decoration: none; }
+
+/* footer */
+footer.site-footer { border-top: 1px solid var(--color-divider); padding: calc(2 * var(--leading)) 0; margin-top: calc(2 * var(--leading)); }
+.footer-grid { display: flex; flex-wrap: wrap; gap: calc(1.5 * var(--leading)); justify-content: space-between; align-items: flex-start; }
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-brand .wordmark { font-family: var(--font-heading); font-weight: 600; font-size: 16px; }
+.footer-tagline { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-top: 6px; }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--leading); font-size: 14px; }
+.footer-links a { text-decoration: none; }
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--half); margin-top: calc(1.5 * var(--leading)); padding-top: var(--half); border-top: 1px solid var(--color-divider); font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <nav class="nav">
+    <a class="brand-row" href="index.html">
+      <span class="brand-mark">Λ</span>
+      <span class="nav-brand">LAMBDA7</span>
+      <span class="sep">/</span>
+      <span class="prod">PAMPA</span>
+    </a>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="index.html" style="text-decoration:none">Volver a la home</a>
+      <a class="btn btn-primary" href="assets/PAMPA-Brochure.pdf" download style="text-decoration:none">Descargar PDF</a>
+    </div>
+  </nav>
+</div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow">Gestión digital de precomisionado y comisionado</span>
+    <h1 class="display">El estado real de cada tarea de campo, <span class="accent">trazado de punta a punta.</span></h1>
+    <p class="lede">PAMPA ordena todo el ciclo de precomisionado y comisionado de un proyecto de Oil &amp; Gas —desde la carga de equipos hasta la emisión de certificados— con datos que se actualizan desde el propio terreno.</p>
+    <p class="expand">Platform for Asset Management &amp; Pre-Commissioning Activities</p>
+    <div class="row">
+      <a class="btn btn-primary" href="assets/PAMPA-Brochure.pdf" download style="text-decoration:none">Descargar el brochure</a>
+      <a class="btn btn-ghost" href="index.html#contacto" style="text-decoration:none">Pedir una demo</a>
+    </div>
+
+    <div class="flow">
+      <div class="phase">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="code">P</span>
+        <div class="name">Precomisionado</div>
+        <div class="desc">Verificación e inspección de cada equipo antes de energizar.</div>
+        <div class="gate">Habilita RFC</div>
+      </div>
+      <span class="flow-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      <div class="phase">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="code">C</span>
+        <div class="name">Comisionado</div>
+        <div class="desc">Pruebas funcionales con el sistema en condición operativa.</div>
+        <div class="gate">Habilita RFSU</div>
+      </div>
+      <span class="flow-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      <div class="phase">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="code">S</span>
+        <div class="name">Puesta en Marcha</div>
+        <div class="desc">Arranque, performance y entrega a producción.</div>
+        <div class="gate">Habilita HO / MC</div>
+      </div>
+      <span class="flow-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      <div class="phase">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="code">R</span>
+        <div class="name">Preservación</div>
+        <div class="desc">Cuidado de equipos en espera, con recordatorios recurrentes.</div>
+        <div class="gate">Transversal al proyecto</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal">
+    <span class="kicker">01 · Qué gestiona</span>
+    <hr class="caption-rule" />
+    <h2 class="section-title">Un solo lugar para items, tareas, punch list y certificados.</h2>
+    <p class="section-sub">La jerarquía sigue la lógica real de la obra: proyecto → sistema → subsistema → equipos → tareas, sin depender de planillas sueltas ni versiones desactualizadas.</p>
+    <div class="grid3">
+      <div class="cell">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="7" width="17" height="13"/><path d="M3.5 7 12 3l8.5 4M12 12v8"/></svg></span>
+        <h3>Equipos e items</h3>
+        <p>Carga individual o masiva por Excel, con tipos de equipo, documentación asociada y agrupamientos (test packs, líneas, vías de chispa).</p>
+      </div>
+      <div class="cell">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h10"/><path d="m17 16 2 2 3-3"/></svg></span>
+        <h3>Tareas por fase</h3>
+        <p>Generación automática de tareas según el tipo de equipo, con seguimiento de avance, fechas reales vs. planificadas y horas-hombre.</p>
+      </div>
+      <div class="cell">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4 2.5 20h19z"/><path d="M12 10v5M12 17.5v.5"/></svg></span>
+        <h3>Punch list</h3>
+        <p>Categorías A/B/C, responsables asignados y cierre documentado con firma de ejecutor, supervisor y coordinador.</p>
+      </div>
+      <div class="cell">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M8 4v16"/></svg></span>
+        <h3>Planillas dinámicas</h3>
+        <p>Impresión de checklists y protocolos con encabezado, datos del equipo y QR generados automáticamente, individuales o agrupados.</p>
+      </div>
+      <div class="cell">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3h12v13l-6 5-6-5z"/><path d="m9 10.5 2 2 4-4"/></svg></span>
+        <h3>Certificados</h3>
+        <p>RFC, RFSU, HO y MC con prerrequisitos verificados por el sistema antes de habilitar la emisión.</p>
+      </div>
+      <div class="cell">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
+        <h3>Planning</h3>
+        <p>Vista de cronograma por fase con horas-hombre estimadas, dependencias entre tareas y avance real de obra.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal">
+    <span class="kicker">02 · Del papel al sistema</span>
+    <hr class="caption-rule" />
+    <h2 class="section-title">Una hoja escaneada, decenas de tareas actualizadas.</h2>
+    <p class="section-sub">El equipo de campo sigue completando planillas en papel. PAMPA lee el escaneo, identifica cada tarea o punch por su código QR y actualiza el estado sin carga manual.</p>
+
+    <div class="workflow blueprint">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="qr-frame">
+        <div class="qr-mock" aria-hidden="true">
+          <span class="on"></span><span class="on"></span><span class="on"></span><span></span><span class="on"></span><span class="on"></span><span class="on"></span>
+          <span class="on"></span><span></span><span class="on"></span><span></span><span class="on"></span><span></span><span class="on"></span>
+          <span class="on"></span><span class="on"></span><span class="on"></span><span></span><span class="on"></span><span class="on"></span><span class="on"></span>
+          <span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span>
+          <span class="on"></span><span class="on"></span><span class="on"></span><span></span><span class="on"></span><span></span><span class="on"></span>
+          <span></span><span class="on"></span><span></span><span class="on"></span><span></span><span class="on"></span><span></span>
+          <span class="on"></span><span></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span class="on"></span>
+        </div>
+      </div>
+      <div class="wf-steps">
+        <div class="row"><span class="n">1</span><div><div class="t">Se sube el PDF escaneado</div><div class="d">Una o varias planillas firmadas en campo, en cualquier orden.</div></div></div>
+        <div class="row"><span class="n">2</span><div><div class="t">PAMPA identifica cada tarea y cada punch</div><div class="d">Reconoce hojas múltiples, adjuntos y agrupamientos automáticamente.</div></div></div>
+        <div class="row"><span class="n">3</span><div><div class="t">El usuario confirma qué avanzar</div><div class="d">Revisión con checklist antes de escribir cualquier cambio en la base.</div></div></div>
+        <div class="row"><span class="n">4</span><div><div class="t">El estado se actualiza al instante</div><div class="d">Con protección ante cortes de conexión: nada queda a mitad de camino.</div></div></div>
+      </div>
+    </div>
+
+    <div class="idrow">
+      <div class="idchip"><span class="sw"></span><div><span class="lbl">1xxxxxx</span><span class="sub">Tarea individual</span></div></div>
+      <div class="idchip"><span class="sw"></span><div><span class="lbl">4xxxxxx</span><span class="sub">Grupo de tareas</span></div></div>
+      <div class="idchip"><span class="sw"></span><div><span class="lbl">5xxxxxx</span><span class="sub">Punch individual</span></div></div>
+      <div class="idchip"><span class="sw"></span><div><span class="lbl">7xxxxxx</span><span class="sub">Grupo de punch</span></div></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num">4</div><div class="lbl">Fases bajo un mismo modelo</div></div>
+      <div class="stat"><div class="num">100%</div><div class="lbl">Trazabilidad equipo → certificado</div></div>
+      <div class="stat"><div class="num">0</div><div class="lbl">Carga manual desde el escaneo</div></div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="descargar" style="padding-top: 0">
+    <span class="kicker">03 · Material</span>
+    <hr class="caption-rule" />
+    <div class="download blueprint">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="copy">
+        <h3>Brochure de PAMPA</h3>
+        <p>El documento completo de la plataforma: fases, capacidades, flujo de escaneo y trazabilidad, en un PDF listo para circular internamente.</p>
+        <div class="meta">PDF · una carilla · español</div>
+      </div>
+      <a class="btn btn-primary" href="assets/PAMPA-Brochure.pdf" download>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+        Descargar PDF
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><span class="brand-mark">Λ</span><span class="wordmark">LAMBDA7</span></div>
+      <div class="footer-tagline">Probar en frío, confiar en caliente.</div>
+    </div>
+    <nav class="footer-links">
+      <a href="index.html#nosotros">Nosotros</a>
+      <a href="index.html#servicios">Servicios</a>
+      <a href="index.html#experiencia">Experiencia</a>
+      <a href="index.html#novedades">Notas técnicas</a>
+      <a href="index.html#contacto">Contacto</a>
+    </nav>
+    <div class="footer-links">
+      <a href="assets/PAMPA-Brochure.pdf" download>Brochure PDF</a>
+      <a href="mailto:contacto@lambda7.com.ar">contacto@lambda7.com.ar</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 Lambda7. Todos los derechos reservados.</span>
+    <span>PAMPA · Platform for Asset Management &amp; Pre-Commissioning Activities</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+</script>
+</body>
+</html>

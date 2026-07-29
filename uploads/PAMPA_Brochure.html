@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>PAMPA — Plataforma de gestión de precomisionado y comisionado</title>
+<style>
+  @font-face{font-family:'Barlow Condensed'; src:url('fonts/BarlowCondensed-SemiBold.ttf'); font-weight:600;}
+  @font-face{font-family:'Barlow Condensed'; src:url('fonts/BarlowCondensed-Bold.ttf'); font-weight:700;}
+  @font-face{font-family:'Barlow Condensed'; src:url('fonts/BarlowCondensed-ExtraBold.ttf'); font-weight:800;}
+  @font-face{font-family:'Inter'; src:url('fonts/Inter-Regular.ttf'); font-weight:400 700;}
+  @font-face{font-family:'JetBrains Mono'; src:url('fonts/JetBrainsMono-Bold.ttf'); font-weight:500 700;}
+  :root{
+    --bg:#0a0f1e;
+    --panel:#0d1420;
+    --panel2:#111a2c;
+    --border:#233150;
+    --gold:#e8c84a;
+    --gold-dim:#8a7530;
+    --text:#eef2fb;
+    --muted:#8a97b8;
+    --blue:#4fc3f7;
+    --green:#6fd196;
+    --violet:#c9a4e8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;}
+  body{width:794px; margin:0 auto; padding:0 0 40px 0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .disp{font-family:'Barlow Condensed',sans-serif; text-transform:uppercase;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:30px 56px 22px 56px;
+    background:
+      radial-gradient(1200px 400px at 85% -10%, rgba(232,200,74,0.10), transparent 60%),
+      linear-gradient(180deg, #0a0f1e 0%, #0b1220 100%);
+    border-bottom:1px solid var(--border);
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; right:-60px; top:-60px;
+    width:340px; height:340px;
+    background:radial-gradient(circle, rgba(79,195,247,0.08), transparent 65%);
+  }
+  .brandrow{display:flex; align-items:center; justify-content:space-between; margin-bottom:28px;}
+  .logo{display:flex; align-items:baseline; gap:2px;}
+  .logo .p{font:800 30px/1 'Barlow Condensed'; letter-spacing:9px; color:var(--text);}
+  .logo .dot{color:var(--gold); font-size:30px; margin:0 2px;}
+  .tagline-mini{font:600 9px/1 'Inter'; letter-spacing:2.5px; color:var(--muted); text-transform:uppercase;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font:700 10px/1 'Inter'; letter-spacing:2px; text-transform:uppercase;
+    color:var(--gold); border:1px solid var(--gold-dim); background:rgba(232,200,74,0.06);
+    padding:6px 12px; border-radius:100px; margin-bottom:20px;
+  }
+  .eyebrow::before{content:"●"; font-size:6px; color:var(--gold);}
+  h1{
+    font:800 46px/1.0 'Barlow Condensed'; letter-spacing:0.5px; text-transform:none;
+    max-width:600px; color:var(--text); margin-bottom:14px;
+  }
+  h1 em{font-style:normal; color:var(--gold);}
+  .lede{font:400 14px/1.5 'Inter'; color:var(--muted); max-width:520px; margin-bottom:24px;}
+
+  /* phase flow — signature element */
+  .flow{
+    display:flex; align-items:stretch; gap:0;
+    border:1px solid var(--border); border-radius:10px; overflow:hidden;
+    background:var(--panel);
+  }
+  .phase{
+    flex:1; padding:16px 14px 14px 14px; position:relative;
+    border-right:1px solid var(--border);
+  }
+  .phase:last-child{border-right:none;}
+  .phase .code{
+    font:700 11px/1 'JetBrains Mono'; letter-spacing:1px;
+    display:inline-block; padding:3px 8px; border-radius:4px; margin-bottom:10px; color:#0a0f1e;
+  }
+  .phase .name{font:700 13px/1.2 'Inter'; color:var(--text); margin-bottom:4px;}
+  .phase .desc{font:400 10px/1.4 'Inter'; color:var(--muted);}
+  .phase .gate{
+    margin-top:10px; padding-top:9px; border-top:1px dashed var(--border);
+    font:600 9px/1 'JetBrains Mono'; letter-spacing:0.5px; color:var(--gold);
+  }
+  .phase.p .code{background:#6fd196;}
+  .phase.c .code{background:#4fc3f7;}
+  .phase.s .code{background:#e8c84a;}
+  .phase.r .code{background:#c9a4e8;}
+  .arrow{
+    position:absolute; right:-9px; top:50%; transform:translateY(-50%);
+    width:16px; height:16px; z-index:2;
+    background:var(--bg); border:1px solid var(--border); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; color:var(--muted);
+  }
+
+  /* ---------- SECTION helper ---------- */
+  section{padding:20px 56px;}
+  .sec-title{
+    font:700 11px/1 'Inter'; letter-spacing:3px; text-transform:uppercase; color:var(--gold);
+    margin-bottom:6px;
+  }
+  .sec-head{font:700 26px/1.1 'Barlow Condensed'; text-transform:none; color:var(--text); margin-bottom:8px;}
+  .sec-sub{font:400 12.5px/1.5 'Inter'; color:var(--muted); max-width:560px; margin-bottom:18px;}
+
+  /* ---------- CAPABILITY GRID ---------- */
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:14px 14px;
+  }
+  .card .icon{
+    width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-size:13px; margin-bottom:9px; color:#0a0f1e;
+  }
+  .card h3{font:700 13px/1.2 'Inter'; color:var(--text); margin-bottom:5px;}
+  .card p{font:400 10px/1.45 'Inter'; color:var(--muted);}
+
+  /* ---------- WORKFLOW STRIP ---------- */
+  .workflow{
+    background:var(--panel2); border:1px solid var(--border); border-radius:12px;
+    padding:18px 22px 18px 22px; display:flex; gap:20px; align-items:center;
+  }
+  .wf-visual{
+    flex-shrink:0; width:118px; height:118px; border-radius:10px;
+    background:radial-gradient(circle at 30% 30%, rgba(232,200,74,0.15), transparent 60%), #0a0f1e;
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .qr-mock{width:76px; height:76px; display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(7,1fr); gap:2px;}
+  .qr-mock div{background:#1a2540;}
+  .qr-mock div.on{background:var(--gold);}
+  .wf-steps{flex:1;}
+  .wf-steps .row{display:flex; gap:12px; margin-bottom:8px;}
+  .wf-steps .row:last-child{margin-bottom:0;}
+  .wf-steps .n{
+    flex-shrink:0; width:22px; height:22px; border-radius:50%; background:transparent;
+    border:1px solid var(--gold-dim); color:var(--gold);
+    font:700 10px/22px 'JetBrains Mono'; text-align:center;
+  }
+  .wf-steps .t{font:600 12px/1.3 'Inter'; color:var(--text);}
+  .wf-steps .d{font:400 10.5px/1.4 'Inter'; color:var(--muted);}
+
+  /* ---------- TRACEABILITY ROW ---------- */
+  .idrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+  .idchip{
+    display:flex; align-items:center; gap:7px;
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:9px 12px; flex:1; min-width:150px;
+  }
+  .idchip .sw{width:8px; height:8px; border-radius:2px; flex-shrink:0;}
+  .idchip .lbl{font:700 9px/1 'JetBrains Mono'; letter-spacing:0.5px; color:var(--text);}
+  .idchip .sub{font:400 8.5px/1.2 'Inter'; color:var(--muted); display:block; margin-top:2px;}
+
+  /* ---------- CLOSING STRIP ---------- */
+  .closing{
+    display:flex; gap:14px; padding:18px 56px 20px 56px;
+  }
+  .stat{flex:1; border-top:2px solid var(--gold); padding-top:10px;}
+  .stat .num{font:800 26px/1 'Barlow Condensed'; color:var(--text);}
+  .stat .lbl{font:600 9px/1.4 'Inter'; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:3px;}
+
+  footer{
+    padding:14px 56px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  footer .mono{font:500 9px/1 'JetBrains Mono'; color:var(--muted); letter-spacing:0.5px;}
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="brandrow">
+      <div class="logo">
+        <span class="p">PAMPA</span>
+        <span class="dot">●</span>
+      </div>
+      <div class="tagline-mini">Platform for Asset Management &amp;<br>Pre-Commissioning Activities</div>
+    </div>
+
+    <div class="eyebrow">Gestión digital de precomisionado y comisionado</div>
+    <h1>El estado real de cada tarea de campo, <em>trazado de punta a punta.</em></h1>
+    <p class="lede">PAMPA ordena todo el ciclo de precomisionado y comisionado de un proyecto de Oil &amp; Gas — desde la carga de equipos hasta la emisión de certificados — con datos que se actualizan desde el propio terreno.</p>
+
+    <div class="flow">
+      <div class="phase p">
+        <span class="code">P</span>
+        <div class="name">Precomisionado</div>
+        <div class="desc">Verificación e inspección de cada equipo antes de energizar.</div>
+        <div class="gate">→ Habilita RFC</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="phase c">
+        <span class="code">C</span>
+        <div class="name">Comisionado</div>
+        <div class="desc">Pruebas funcionales con el sistema en condición operativa.</div>
+        <div class="gate">→ Habilita RFSU</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="phase s">
+        <span class="code">S</span>
+        <div class="name">Puesta en Marcha</div>
+        <div class="desc">Arranque, performance y entrega a producción.</div>
+        <div class="gate">→ Habilita HO / MC</div>
+      </div>
+      <div class="arrow">›</div>
+      <div class="phase r">
+        <span class="code">R</span>
+        <div class="name">Preservación</div>
+        <div class="desc">Cuidado de equipos en espera, con recordatorios recurrentes.</div>
+        <div class="gate">Transversal a todo el proyecto</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPACIDADES -->
+  <section>
+    <div class="sec-title">Qué gestiona</div>
+    <div class="sec-head">Un solo lugar para items, tareas, punch list y certificados</div>
+    <p class="sec-sub">La jerarquía sigue la lógica real de la obra: proyecto → sistema → subsistema → equipos → tareas — sin depender de planillas sueltas ni versiones desactualizadas.</p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="icon" style="background:#6fd196;">◆</div>
+        <h3>Equipos e items</h3>
+        <p>Carga individual o masiva por Excel, con tipos de equipo, documentación asociada y agrupamientos (test packs, líneas, vías de chispa).</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#4fc3f7;">✓</div>
+        <h3>Tareas por fase</h3>
+        <p>Generación automática de tareas según el tipo de equipo, con seguimiento de avance, fechas reales vs. planificadas y horas-hombre.</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#e8c84a;">▲</div>
+        <h3>Punch list</h3>
+        <p>Categorías A/B/C, responsables asignados y cierre documentado con firma de ejecutor, supervisor y coordinador.</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#c9a4e8;">▣</div>
+        <h3>Planillas dinámicas</h3>
+        <p>Impresión de checklists y protocolos con encabezado, datos del equipo y QR generados automáticamente, individuales o agrupados.</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#f28b82;">◈</div>
+        <h3>Certificados</h3>
+        <p>RFC, RFSU, HO y MC con prerrequisitos verificados por el sistema antes de habilitar la emisión.</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#8a97b8;">▤</div>
+        <h3>Planning</h3>
+        <p>Vista de cronograma por fase con horas-hombre estimadas, dependencias entre tareas y avance real de obra.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKFLOW QR -->
+  <section style="padding-top:4px; padding-bottom:14px;">
+    <div class="sec-title">Del papel al sistema</div>
+    <div class="sec-head">Una hoja escaneada, decenas de tareas actualizadas</div>
+    <p class="sec-sub">El equipo de campo sigue completando planillas en papel. PAMPA lee el escaneo, identifica cada tarea o punch por su código QR y actualiza el estado sin carga manual.</p>
+
+    <div class="workflow">
+      <div class="wf-visual">
+        <div class="qr-mock">
+          <div class="on"></div><div class="on"></div><div class="on"></div><div></div><div class="on"></div><div class="on"></div><div class="on"></div>
+          <div class="on"></div><div></div><div class="on"></div><div></div><div class="on"></div><div></div><div class="on"></div>
+          <div class="on"></div><div class="on"></div><div class="on"></div><div></div><div class="on"></div><div class="on"></div><div class="on"></div>
+          <div></div><div></div><div></div><div class="on"></div><div></div><div></div><div></div>
+          <div class="on"></div><div class="on"></div><div class="on"></div><div></div><div class="on"></div><div></div><div class="on"></div>
+          <div></div><div class="on"></div><div></div><div class="on"></div><div></div><div class="on"></div><div></div>
+          <div class="on"></div><div></div><div class="on"></div><div class="on"></div><div class="on"></div><div></div><div class="on"></div>
+        </div>
+      </div>
+      <div class="wf-steps">
+        <div class="row">
+          <div class="n">1</div>
+          <div><div class="t">Se sube el PDF escaneado</div><div class="d">Una o varias planillas firmadas en campo, en cualquier orden.</div></div>
+        </div>
+        <div class="row">
+          <div class="n">2</div>
+          <div><div class="t">PAMPA identifica cada tarea y cada punch</div><div class="d">Reconoce hojas múltiples, adjuntos y agrupamientos automáticamente.</div></div>
+        </div>
+        <div class="row">
+          <div class="n">3</div>
+          <div><div class="t">El usuario confirma qué avanzar</div><div class="d">Revisión con checklist antes de escribir cualquier cambio en la base.</div></div>
+        </div>
+        <div class="row">
+          <div class="n">4</div>
+          <div><div class="t">El estado se actualiza al instante</div><div class="d">Con protección ante cortes de conexión: nada queda a mitad de camino.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="idrow">
+      <div class="idchip"><span class="sw" style="background:#6fd196;"></span><div><span class="lbl">1xxxxxx</span><span class="sub">Tarea individual</span></div></div>
+      <div class="idchip"><span class="sw" style="background:#4fc3f7;"></span><div><span class="lbl">4xxxxxx</span><span class="sub">Grupo de tareas</span></div></div>
+      <div class="idchip"><span class="sw" style="background:#e8c84a;"></span><div><span class="lbl">5xxxxxx</span><span class="sub">Punch individual</span></div></div>
+      <div class="idchip"><span class="sw" style="background:#c9a4e8;"></span><div><span class="lbl">7xxxxxx</span><span class="sub">Grupo de punch</span></div></div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <div class="closing">
+    <div class="stat"><div class="num">4</div><div class="lbl">Fases bajo un mismo modelo</div></div>
+    <div class="stat"><div class="num">100%</div><div class="lbl">Trazabilidad equipo → certificado</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">Carga manual desde el escaneo</div></div>
+  </div>
+
+  <footer>
+    <div class="logo"><span class="p" style="font-size:16px; letter-spacing:6px;">PAMPA</span></div>
+    <div class="mono">PLATFORM FOR ASSET MANAGEMENT &amp; PRE-COMMISSIONING ACTIVITIES</div>
+  </footer>
+
+</body>
+</html>
