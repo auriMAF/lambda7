@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notas técnicas | LAMBDA7</title>
+<meta name="description" content="Apuntes breves sobre comisionado, metodología y seguridad, escritos por el equipo de LAMBDA7." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0f1e'/%3E%3Cpath d='M16 6.5 24.5 25.5 20.6 25.5 16 14.6 11.4 25.5 7.5 25.5Z' fill='%2335b8ab'/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230a0f1e'/%3E%3Cpath d='M90 38 137 142 116 142 90 84 64 142 43 142Z' fill='%2335b8ab'/%3E%3C/svg%3E" />
+<meta name="theme-color" content="#0a0f1e" />
+<script src="./ds-base.js"></script>
+<style>
+:root {
+  --color-bg: #0a0f1e;
+  --color-surface: #101830;
+  --color-surface-2: #141d38;
+  --color-text: #eef2f7;
+  --color-divider: color-mix(in srgb, #ffffff 14%, transparent);
+  --color-divider-strong: color-mix(in srgb, #ffffff 24%, transparent);
+
+  --color-accent: #35b8ab;
+  --color-accent-100: #e4f8f5;
+  --color-accent-200: #b9ece4;
+  --color-accent-300: #8ddccf;
+  --color-accent-400: #5fcabb;
+  --color-accent-500: #35b8ab;
+  --color-accent-600: #279488;
+  --color-accent-700: #1e756c;
+  --color-accent-800: #164f49;
+  --color-accent-900: #0d2f2c;
+  --color-accent-2-100: #e4f8f5;
+  --color-accent-2-700: #1e756c;
+  --color-accent-2-800: #164f49;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.45);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.5);
+  --shadow-lg: 0 20px 48px rgba(0,0,0,0.6);
+
+  --leading: 24px;
+  --half: 12px;
+  --edge: clamp(20px, 5vw, 72px);
+}
+body { margin: 0; text-wrap: pretty; }
+a { color: var(--color-accent-300); }
+a:hover { color: var(--color-accent-200); }
+.btn { white-space: nowrap; }
+.btn-ghost { padding-inline: var(--space-3); border-color: var(--color-divider); }
+.tag-accent, .tag-accent-2 { background: color-mix(in srgb, var(--color-accent) 16%, transparent); color: var(--color-accent-200); }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--edge); }
+
+.topnav { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--color-bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-divider); }
+.topnav .nav { padding-inline: max(var(--edge), calc((100% - 1200px) / 2 + var(--edge))); gap: var(--space-6); }
+.brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--color-accent); color: var(--color-accent); font-family: var(--font-heading); font-weight: 600; font-size: 17px; flex: none; }
+.brand-row { display: flex; align-items: center; gap: 10px; margin-right: auto; text-decoration: none; color: inherit; }
+.brand-row .nav-brand { margin: 0; letter-spacing: 0.02em; }
+.brand-row .sep { color: color-mix(in srgb, var(--color-text) 30%, transparent); }
+.brand-row .prod { font-family: var(--font-heading); font-weight: 600; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-300); }
+.nav-cta { display: flex; align-items: center; gap: var(--space-3); }
+.nav-cta a { text-decoration: none; }
+
+.head { padding: calc(2.5 * var(--leading)) 0 var(--leading); }
+.kicker { display: block; font-size: 13px; line-height: var(--half); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--color-accent-300); margin: 0 0 var(--half); }
+.caption-rule { height: 1px; border: 0; margin: 0 0 calc(var(--leading) - var(--half)); background: var(--color-divider); }
+.display { font-family: var(--font-heading); font-weight: 600; font-size: clamp(34px, 5vw, 58px); line-height: 1.05; text-transform: uppercase; margin: 0 0 var(--half); }
+.head p { font-size: 17px; line-height: var(--leading); max-width: 60ch; margin: 0; color: color-mix(in srgb, var(--color-text) 82%, transparent); }
+
+.news-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 32px); padding-bottom: calc(3 * var(--leading)); }
+.news-card { min-width: 0; border: 1px solid var(--color-divider); display: flex; flex-direction: column; transition: border-color .3s ease, background .3s ease; }
+.news-card:hover { border-color: color-mix(in srgb, var(--color-accent) 55%, transparent); background: color-mix(in srgb, var(--color-accent) 5%, transparent); }
+.news-thumb { aspect-ratio: 16/10; border-bottom: 1px solid var(--color-divider); background:
+  repeating-linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 14%, transparent) 0 2px, transparent 2px 14px), var(--color-surface); }
+.news-body { padding: var(--half) var(--leading) var(--leading); display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.news-body .meta { display: flex; gap: var(--space-3); align-items: center; font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); }
+.news-body h2 { font-family: var(--font-heading); font-weight: 600; font-size: 20px; margin: 4px 0 0; line-height: 1.15; }
+.news-body h2 a { text-decoration: none; color: var(--color-text); }
+.news-body h2 a:hover { color: var(--color-accent-200); }
+.news-body p { font-size: 14px; line-height: var(--leading); color: color-mix(in srgb, var(--color-text) 78%, transparent); margin: 0; flex: 1; }
+.news-body .read { font-size: 13px; font-weight: 600; color: var(--color-accent-300); text-decoration: none; margin-top: var(--half); }
+.soon { opacity: .55; }
+.soon .news-body .read { color: color-mix(in srgb, var(--color-text) 50%, transparent); }
+@media (max-width: 880px) { .news-grid { grid-template-columns: minmax(0, 1fr); } }
+
+footer.site-footer { border-top: 1px solid var(--color-divider); padding: calc(2 * var(--leading)) 0; }
+.footer-grid { display: flex; flex-wrap: wrap; gap: calc(1.5 * var(--leading)); justify-content: space-between; align-items: flex-start; }
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-brand .wordmark { font-family: var(--font-heading); font-weight: 600; font-size: 16px; }
+.footer-tagline { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-top: 6px; }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--leading); font-size: 14px; }
+.footer-links a { text-decoration: none; }
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--half); margin-top: calc(1.5 * var(--leading)); padding-top: var(--half); border-top: 1px solid var(--color-divider); font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <nav class="nav">
+    <a class="brand-row" href="../index.html">
+      <span class="brand-mark">Λ</span>
+      <span class="nav-brand">LAMBDA7</span>
+      <span class="sep">/</span>
+      <span class="prod">Notas técnicas</span>
+    </a>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="../index.html">Volver a la home</a>
+      <a class="btn btn-primary" href="../index.html#contacto">Contactanos</a>
+    </div>
+  </nav>
+</div>
+
+<div class="wrap">
+  <header class="head">
+    <span class="kicker">Gacetillas técnicas</span>
+    <hr class="caption-rule" />
+    <h1 class="display">Notas técnicas</h1>
+    <p>Apuntes breves sobre comisionado, metodología y seguridad, escritos por el equipo. Sin teoría de manual: lo que aparece en obra y cómo se resuelve.</p>
+  </header>
+
+  <div class="news-grid">
+    <article class="news-card">
+      <div class="news-thumb"></div>
+      <div class="news-body">
+        <div class="meta"><span class="tag tag-accent">Comisionado</span><span>12 jun 2026</span></div>
+        <h2><a href="arranque-tardio.html">El costo real de un arranque tardío</a></h2>
+        <p>Cada día de atraso en el arranque tiene un costo que rara vez se mide a tiempo. Un repaso de por qué conviene anticiparlo.</p>
+        <a class="read" href="arranque-tardio.html">Leer más →</a>
+      </div>
+    </article>
+    <article class="news-card soon">
+      <div class="news-thumb"></div>
+      <div class="news-body">
+        <div class="meta"><span class="tag tag-accent">Metodología</span><span>Próximamente</span></div>
+        <h2>Por qué se comisiona por sistemas y no por áreas</h2>
+        <p>La lógica de sistemas y subsistemas ordena la secuencia de completamiento y evita reprocesos entre disciplinas.</p>
+        <span class="read">En preparación</span>
+      </div>
+    </article>
+    <article class="news-card soon">
+      <div class="news-thumb"></div>
+      <div class="news-body">
+        <div class="meta"><span class="tag tag-accent">Seguridad</span><span>Próximamente</span></div>
+        <h2>Pruebas estáticas vs. dinámicas: qué verifica cada una</h2>
+        <p>Precomisionado y comisionado responden preguntas distintas. Repasamos qué cubre cada etapa y por qué no se saltean.</p>
+        <span class="read">En preparación</span>
+      </div>
+    </article>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><span class="brand-mark">Λ</span><span class="wordmark">LAMBDA7</span></div>
+      <div class="footer-tagline">Probar en frío, confiar en caliente.</div>
+    </div>
+    <nav class="footer-links">
+      <a href="../index.html#nosotros">Nosotros</a>
+      <a href="../index.html#servicios">Servicios</a>
+      <a href="../index.html#experiencia">Experiencia</a>
+      <a href="../pampa.html">PAMPA</a>
+      <a href="../index.html#contacto">Contacto</a>
+    </nav>
+    <div class="footer-links">
+      <a href="mailto:contacto@lambda7.com.ar">contacto@lambda7.com.ar</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 Lambda7. Todos los derechos reservados.</span>
+    <span>Comisionado &amp; Puesta en Marcha · Oil &amp; Gas</span>
+  </div>
+</footer>
+
+</body>
+</html>

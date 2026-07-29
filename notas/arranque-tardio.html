@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>El costo real de un arranque tardío | Notas técnicas LAMBDA7</title>
+<meta name="description" content="Cada día de atraso en el arranque tiene un costo que rara vez se mide a tiempo. Un repaso de por qué conviene anticiparlo." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0f1e'/%3E%3Cpath d='M16 6.5 24.5 25.5 20.6 25.5 16 14.6 11.4 25.5 7.5 25.5Z' fill='%2335b8ab'/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230a0f1e'/%3E%3Cpath d='M90 38 137 142 116 142 90 84 64 142 43 142Z' fill='%2335b8ab'/%3E%3C/svg%3E" />
+<meta name="theme-color" content="#0a0f1e" />
+<script src="./ds-base.js"></script>
+<style>
+:root {
+  --color-bg: #0a0f1e;
+  --color-surface: #101830;
+  --color-surface-2: #141d38;
+  --color-text: #eef2f7;
+  --color-divider: color-mix(in srgb, #ffffff 14%, transparent);
+  --color-divider-strong: color-mix(in srgb, #ffffff 24%, transparent);
+
+  --color-accent: #35b8ab;
+  --color-accent-100: #e4f8f5;
+  --color-accent-200: #b9ece4;
+  --color-accent-300: #8ddccf;
+  --color-accent-400: #5fcabb;
+  --color-accent-500: #35b8ab;
+  --color-accent-600: #279488;
+  --color-accent-700: #1e756c;
+  --color-accent-800: #164f49;
+  --color-accent-900: #0d2f2c;
+  --color-accent-2-100: #e4f8f5;
+  --color-accent-2-700: #1e756c;
+  --color-accent-2-800: #164f49;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.45);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.5);
+  --shadow-lg: 0 20px 48px rgba(0,0,0,0.6);
+
+  --leading: 24px;
+  --half: 12px;
+  --edge: clamp(20px, 5vw, 72px);
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; text-wrap: pretty; }
+a { color: var(--color-accent-300); }
+a:hover { color: var(--color-accent-200); }
+.btn { white-space: nowrap; }
+.btn-ghost { padding-inline: var(--space-3); border-color: var(--color-divider); }
+.tag-accent, .tag-accent-2 { background: color-mix(in srgb, var(--color-accent) 16%, transparent); color: var(--color-accent-200); }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--edge); }
+
+.corner { position: absolute; width: 15px; height: 15px; color: color-mix(in srgb, var(--color-text) 45%, transparent); pointer-events: none; }
+.corner::before { content: ""; position: absolute; left: 7px; top: 0; width: 1px; height: 100%; background: currentColor; }
+.corner::after { content: ""; position: absolute; top: 7px; left: 0; width: 100%; height: 1px; background: currentColor; }
+.corner.tl { top: -8px; left: -8px; } .corner.tr { top: -8px; right: -8px; }
+.corner.bl { bottom: -8px; left: -8px; } .corner.br { bottom: -8px; right: -8px; }
+
+/* nav */
+.topnav { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--color-bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-divider); }
+.topnav .nav { padding-inline: max(var(--edge), calc((100% - 1200px) / 2 + var(--edge))); gap: var(--space-6); }
+.brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--color-accent); color: var(--color-accent); font-family: var(--font-heading); font-weight: 600; font-size: 17px; flex: none; }
+.brand-row { display: flex; align-items: center; gap: 10px; margin-right: auto; text-decoration: none; color: inherit; }
+.brand-row .nav-brand { margin: 0; letter-spacing: 0.02em; }
+.brand-row .sep { color: color-mix(in srgb, var(--color-text) 30%, transparent); }
+.brand-row .prod { font-family: var(--font-heading); font-weight: 600; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-300); }
+.nav-cta { display: flex; align-items: center; gap: var(--space-3); }
+.nav-cta a { text-decoration: none; }
+
+/* artículo */
+article.nota { max-width: 760px; margin: 0 auto; padding: calc(2.5 * var(--leading)) var(--edge) calc(2 * var(--leading)); }
+.nota-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-bottom: var(--leading); }
+.nota h1 { font-family: var(--font-heading); font-weight: 600; font-size: clamp(34px, 5.2vw, 58px); line-height: 1.05; text-transform: uppercase; letter-spacing: 0.005em; margin: 0 0 var(--half); }
+.nota .deck { font-size: 19px; line-height: 1.5; color: var(--color-accent-200); margin: 0 0 calc(1.5 * var(--leading)); max-width: 58ch; }
+.nota-rule { height: 1px; border: 0; background: var(--color-divider); margin: 0 0 calc(1.5 * var(--leading)); }
+.nota h2 { font-family: var(--font-heading); font-weight: 600; font-size: clamp(22px, 2.6vw, 28px); text-transform: uppercase; letter-spacing: 0.02em; margin: calc(2 * var(--leading)) 0 var(--half); padding-bottom: 8px; border-bottom: 1px solid var(--color-divider-strong); }
+.nota p { font-size: 17px; line-height: 1.65; margin: 0 0 var(--leading); color: color-mix(in srgb, var(--color-text) 88%, transparent); }
+.nota p.lead { font-size: 19px; line-height: 1.6; color: var(--color-text); }
+.nota strong { color: var(--color-text); font-weight: 600; }
+.nota ul { list-style: none; margin: 0 0 var(--leading); padding: 0; display: flex; flex-direction: column; gap: var(--half); }
+.nota li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--half); font-size: 16px; line-height: 1.6; color: color-mix(in srgb, var(--color-text) 85%, transparent); }
+.nota li::before { content: "+"; color: var(--color-accent); font-size: 15px; line-height: 1.6; }
+
+/* tablas */
+.tbl-frame { position: relative; border: 1px solid var(--color-divider); margin: var(--leading) 0 calc(1.5 * var(--leading)); }
+table.nota-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.nota-table th { text-align: left; font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-accent-300); padding: var(--half) var(--leading); border-bottom: 1px solid var(--color-divider); vertical-align: bottom; }
+table.nota-table td { padding: var(--half) var(--leading); border-bottom: 1px solid var(--color-divider); line-height: 1.5; vertical-align: top; color: color-mix(in srgb, var(--color-text) 82%, transparent); }
+table.nota-table tr:last-child td { border-bottom: 0; }
+table.nota-table td.cat { color: var(--color-text); font-weight: 500; width: 34%; }
+@media (max-width: 620px) {
+  table.nota-table { font-size: 13px; }
+  table.nota-table th, table.nota-table td { padding-inline: var(--half); }
+}
+
+/* callout / patrón */
+.callout { position: relative; border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent); background: color-mix(in srgb, var(--color-accent) 8%, transparent); padding: var(--leading); margin: calc(1.5 * var(--leading)) 0; font-size: 18px; line-height: 1.55; }
+.callout b { color: var(--color-accent-200); font-weight: 600; }
+.pattern { position: relative; border: 1px solid var(--color-divider); background: var(--color-surface); padding: var(--leading); margin: calc(1.5 * var(--leading)) 0; }
+.pattern .label { font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-300); margin-bottom: var(--half); }
+.pattern p { font-size: 16px; margin: 0; }
+
+/* figura iceberg */
+figure.diagram { position: relative; margin: calc(1.5 * var(--leading)) 0; border: 1px solid var(--color-divider); padding: var(--leading) var(--half) var(--half); background: color-mix(in srgb, var(--color-surface) 70%, transparent); }
+figure.diagram svg { display: block; width: 100%; height: auto; }
+figure.diagram figcaption { font-size: 12px; line-height: 1.5; letter-spacing: 0.03em; color: color-mix(in srgb, var(--color-text) 58%, transparent); margin-top: var(--half); padding-top: var(--half); border-top: 1px solid var(--color-divider); }
+
+/* cierre + CTA */
+.closing { border-top: 1px solid var(--color-divider); margin-top: calc(2 * var(--leading)); padding-top: calc(1.5 * var(--leading)); }
+.closing .sign { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-top: var(--leading); }
+.nota-cta { position: relative; border: 1px solid var(--color-divider); background: var(--color-surface); padding: var(--leading); margin-top: calc(2 * var(--leading)); display: flex; flex-wrap: wrap; gap: var(--leading); align-items: center; justify-content: space-between; }
+.nota-cta h3 { font-family: var(--font-heading); font-weight: 600; font-size: 22px; text-transform: uppercase; margin: 0 0 6px; }
+.nota-cta p { font-size: 14px; margin: 0; max-width: 44ch; color: color-mix(in srgb, var(--color-text) 75%, transparent); }
+.nota-cta .row { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.nota-cta a { text-decoration: none; }
+
+/* footer */
+footer.site-footer { border-top: 1px solid var(--color-divider); padding: calc(2 * var(--leading)) 0; }
+.footer-grid { display: flex; flex-wrap: wrap; gap: calc(1.5 * var(--leading)); justify-content: space-between; align-items: flex-start; }
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-brand .wordmark { font-family: var(--font-heading); font-weight: 600; font-size: 16px; }
+.footer-tagline { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-top: 6px; }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--leading); font-size: 14px; }
+.footer-links a { text-decoration: none; }
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--half); margin-top: calc(1.5 * var(--leading)); padding-top: var(--half); border-top: 1px solid var(--color-divider); font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <nav class="nav">
+    <a class="brand-row" href="../index.html">
+      <span class="brand-mark">Λ</span>
+      <span class="nav-brand">LAMBDA7</span>
+      <span class="sep">/</span>
+      <span class="prod">Notas técnicas</span>
+    </a>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="index.html">Todas las notas</a>
+      <a class="btn btn-primary" href="../index.html#contacto">Contactanos</a>
+    </div>
+  </nav>
+</div>
+
+<article class="nota">
+  <div class="nota-meta">
+    <span class="tag tag-accent">Comisionado</span>
+    <span>12 jun 2026</span>
+    <span>·</span>
+    <span>Lectura 6 min</span>
+  </div>
+  <h1>El costo real de un arranque tardío</h1>
+  <p class="deck">Cada día de atraso en el arranque tiene un costo que rara vez se mide a tiempo. Un repaso de por qué conviene anticiparlo.</p>
+  <hr class="nota-rule" />
+
+  <p class="lead">Cuando un arranque se corre unos días, lo primero que se contabiliza es lo más visible: una cuadrilla que sigue en obra, un equipo alquilado que hay que extender, algunas horas extra de supervisión. Ese es el costo que entra en el informe. El que realmente pesa suele quedar afuera, precisamente porque no aparece en ninguna planilla hasta que ya es demasiado tarde para actuar sobre él.</p>
+
+  <h2>Lo que se ve</h2>
+  <p>Es el costo directo del atraso: todo lo que sigue facturando mientras el sistema no arranca.</p>
+  <div class="tbl-frame">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <table class="nota-table">
+      <thead><tr><th scope="col">Concepto</th><th scope="col">Por qué crece con cada día</th></tr></thead>
+      <tbody>
+        <tr><td class="cat">Personal contratista</td><td>Cuadrillas y supervisión permanecen en obra más allá de lo previsto en el contrato.</td></tr>
+        <tr><td class="cat">Equipos y alquileres</td><td>Grúas, generadores, unidades de prueba y equipos especiales extienden su locación.</td></tr>
+        <tr><td class="cat">Logística</td><td>Alojamiento, traslados y viáticos de cuadrillas que iban a estar desmovilizadas.</td></tr>
+        <tr><td class="cat">Gestión</td><td>Horas adicionales de coordinación, replanificación y seguimiento del atraso.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Lo que no se ve</h2>
+  <p>Es el costo indirecto —normalmente varias veces mayor que el anterior— y el que casi nunca se anticipa, porque no tiene una línea propia en ningún presupuesto.</p>
+
+  <figure class="diagram">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <svg viewBox="0 0 640 380" role="img" aria-labelledby="ice-title ice-desc">
+      <title id="ice-title">Diagrama de iceberg del costo de un arranque tardío</title>
+      <desc id="ice-desc">Sobre la línea de flotación, el costo directo, pequeño. Debajo, cinco costos indirectos de mayor magnitud: producción diferida, capital inmovilizado, efecto cascada, cláusulas contractuales y desgaste de la relación con el operador.</desc>
+
+      <!-- punta: costo directo -->
+      <polygon points="298,26 342,26 320,116" fill="color-mix(in srgb, #35b8ab 22%, transparent)" stroke="#35b8ab" stroke-width="1.25" />
+      <text x="356" y="52" font-family="Barlow Condensed, sans-serif" font-size="15" font-weight="600" letter-spacing="1.4" fill="#eef2f7">COSTO DIRECTO</text>
+      <text x="356" y="70" font-family="Barlow, sans-serif" font-size="12" fill="#8ddccf">Lo que ya está en el informe</text>
+      <line x1="342" y1="46" x2="352" y2="46" stroke="#35b8ab" stroke-width="1" />
+
+      <!-- línea de flotación -->
+      <line x1="0" y1="116" x2="640" y2="116" stroke="#35b8ab" stroke-width="1.25" stroke-dasharray="6 5" />
+      <text x="0" y="108" font-family="Barlow Condensed, sans-serif" font-size="11" letter-spacing="1.6" fill="#35b8ab">LÍNEA DE FLOTACIÓN — LO QUE SE MIDE HOY</text>
+
+      <!-- masa sumergida -->
+      <polygon points="52,116 588,116 470,364 170,364" fill="color-mix(in srgb, #35b8ab 7%, transparent)" stroke="color-mix(in srgb, #35b8ab 55%, transparent)" stroke-width="1.25" />
+
+      <g font-family="Barlow, sans-serif" font-size="14" fill="#eef2f7">
+        <g>
+          <text x="200" y="156" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1" fill="#35b8ab">01</text>
+          <text x="226" y="156">Producción diferida</text>
+        </g>
+        <g>
+          <text x="200" y="196" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1" fill="#35b8ab">02</text>
+          <text x="226" y="196">Capital inmovilizado sin producir</text>
+        </g>
+        <g>
+          <text x="200" y="236" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1" fill="#35b8ab">03</text>
+          <text x="226" y="236">Efecto cascada sobre otros pozos o sistemas</text>
+        </g>
+        <g>
+          <text x="212" y="276" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1" fill="#35b8ab">04</text>
+          <text x="238" y="276">Cláusulas contractuales por fecha</text>
+        </g>
+        <g>
+          <text x="238" y="316" font-family="Barlow Condensed, sans-serif" font-size="13" font-weight="600" letter-spacing="1" fill="#35b8ab">05</text>
+          <text x="264" y="316">Desgaste de la relación con el operador</text>
+        </g>
+      </g>
+
+      <!-- reglas finas entre ítems -->
+      <g stroke="color-mix(in srgb, #ffffff 10%, transparent)" stroke-width="1">
+        <line x1="186" y1="172" x2="562" y2="172" />
+        <line x1="196" y1="212" x2="552" y2="212" />
+        <line x1="205" y1="252" x2="543" y2="252" />
+        <line x1="224" y1="292" x2="524" y2="292" />
+      </g>
+
+      <!-- marcas de profundidad -->
+      <g stroke="color-mix(in srgb, #35b8ab 35%, transparent)" stroke-width="1">
+        <line x1="120" y1="150" x2="132" y2="150" />
+        <line x1="120" y1="240" x2="132" y2="240" />
+        <line x1="120" y1="330" x2="132" y2="330" />
+      </g>
+    </svg>
+    <figcaption>La parte visible de un atraso es la más chica. El grueso del costo está debajo de lo que se suele medir.</figcaption>
+  </figure>
+
+  <ul>
+    <li><span><strong>Producción diferida:</strong> cada día sin arrancar es un día sin el ingreso que ese sistema estaba diseñado para generar. No se recupera corriendo el calendario — se pierde.</span></li>
+    <li><span><strong>Capital inmovilizado:</strong> el activo ya está construido y pagado. Mientras no produce, ese capital no está rindiendo nada.</span></li>
+    <li><span><strong>Efecto cascada:</strong> en un desarrollo con varios pozos o sistemas, un atraso puntual puede correr la fecha de los siguientes si comparten cuadrillas, equipos o ventanas de intervención.</span></li>
+    <li><span><strong>Cláusulas contractuales:</strong> muchos contratos EPC o de servicios atan penalidades a la fecha de arranque, no al esfuerzo invertido en llegar a tiempo.</span></li>
+    <li><span><strong>Relación con el operador:</strong> una fecha que se corre una vez se explica. Si se corre dos o tres veces, lo que se pierde es la confianza en la próxima estimación.</span></li>
+  </ul>
+
+  <h2>Por qué el atraso se descubre tarde</h2>
+  <p>El problema rara vez es la falta de trabajo: es la falta de visibilidad sobre qué trabajo puntual está frenando todo lo demás.</p>
+
+  <div class="pattern">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <div class="label">Un patrón habitual</div>
+    <p>Un ítem de punch list categoría A queda pendiente en un sistema. Nadie lo marca como bloqueante porque, en la planilla semanal, es una línea más entre cientos. Diez días después, cuando se arma el paquete para pedir el certificado de arranque, aparece como el único punto que falta cerrar — y ya no hay margen para resolverlo sin correr la fecha.</p>
+  </div>
+
+  <p>Lo que hace tarde visible al atraso no es la cantidad de tareas pendientes, sino la demora entre que algo se completa en el campo y ese dato llega a quien tiene que decidir. Mientras esa demora se mida en días, el atraso se detecta cuando ya es un problema — no cuando todavía era una alerta.</p>
+
+  <h2>Qué cambia con visibilidad en tiempo real</h2>
+  <div class="tbl-frame">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <table class="nota-table">
+      <thead><tr><th scope="col"></th><th scope="col">Reporte diferido</th><th scope="col">Visibilidad en tiempo real</th></tr></thead>
+      <tbody>
+        <tr><td class="cat">Avance por sistema</td><td>Se conoce al cierre de la semana</td><td>Se conoce al momento en que se completa la tarea</td></tr>
+        <tr><td class="cat">Qué bloquea el certificado</td><td>Se descubre armando el paquete final</td><td>Es visible desde el primer día</td></tr>
+        <tr><td class="cat">Punch list crítico</td><td>Se mezcla con el resto en una planilla larga</td><td>Queda identificado como bloqueante de inmediato</td></tr>
+        <tr><td class="cat">Corrección de rumbo</td><td>Cuando ya no hay margen de fecha</td><td>Mientras todavía hay margen de fecha</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    La diferencia entre anticipar un atraso y sufrirlo no está en trabajar más rápido — está en <b>enterarse a tiempo</b> de qué es lo que realmente está frenando el arranque.
+  </div>
+
+  <div class="closing">
+    <p>El costo de un arranque tardío no se genera el día que se corre la fecha: se acumula en cada jornada en que nadie tuvo, a tiempo, la información necesaria para actuar. Anticiparlo no depende de trabajar más rápido sobre el final, sino de tener trazabilidad real desde el primer chequeo hasta el último certificado.</p>
+    <div class="sign">LAMBDA7 · Gestión de precomisionado y comisionado — Oil &amp; Gas</div>
+  </div>
+
+  <div class="nota-cta">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <div>
+      <h3>Trazabilidad desde el primer chequeo</h3>
+      <p>PAMPA es la plataforma con la que el equipo gestiona el avance por sistemas y subsistemas en tiempo real.</p>
+    </div>
+    <div class="row">
+      <a class="btn btn-primary" href="../pampa.html">Conocé PAMPA</a>
+      <a class="btn btn-ghost" href="../index.html#contacto">Contactanos</a>
+    </div>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><span class="brand-mark">Λ</span><span class="wordmark">LAMBDA7</span></div>
+      <div class="footer-tagline">Probar en frío, confiar en caliente.</div>
+    </div>
+    <nav class="footer-links">
+      <a href="../index.html#nosotros">Nosotros</a>
+      <a href="../index.html#servicios">Servicios</a>
+      <a href="../index.html#experiencia">Experiencia</a>
+      <a href="../pampa.html">PAMPA</a>
+      <a href="../index.html#novedades">Notas técnicas</a>
+      <a href="../index.html#contacto">Contacto</a>
+    </nav>
+    <div class="footer-links">
+      <a href="mailto:contacto@lambda7.com.ar">contacto@lambda7.com.ar</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 Lambda7. Todos los derechos reservados.</span>
+    <span>Comisionado &amp; Puesta en Marcha · Oil &amp; Gas</span>
+  </div>
+</footer>
+
+</body>
+</html>

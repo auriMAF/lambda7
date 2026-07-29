@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El costo real de un arranque tardío</title>
+<style>
+  :root{
+    --ink:#1a2230;
+    --muted:#5c6577;
+    --line:#e2e5ec;
+    --panel:#f6f7fa;
+    --accent:#b9862a;
+    --accent-bg:#fbf2e2;
+    --red:#a84432;
+    --red-bg:#fbeae6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#fff; color:var(--ink);
+    font-family:Georgia,'Times New Roman',serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:56px 24px 80px 24px;}
+  .kicker{
+    font-family:Arial,Helvetica,sans-serif; font-size:12px; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:14px;
+  }
+  h1{font-size:34px; line-height:1.15; margin:0 0 16px 0; font-weight:700;}
+  .deck{font-size:18px; color:var(--muted); margin:0 0 40px 0; font-style:italic;}
+  h2{
+    font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:700;
+    letter-spacing:0.3px; color:var(--ink); margin:44px 0 14px 0;
+    padding-bottom:8px; border-bottom:2px solid var(--ink);
+  }
+  p{font-size:16.5px; margin:0 0 16px 0;}
+  .lead{font-size:18px; color:var(--ink);}
+  ul{margin:0 0 18px 0; padding-left:22px;}
+  li{font-size:16px; margin-bottom:8px;}
+  strong{color:var(--ink);}
+
+  /* tabla comparativa */
+  table{width:100%; border-collapse:collapse; margin:20px 0 24px 0; font-family:Arial,Helvetica,sans-serif;}
+  th{
+    text-align:left; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--muted); padding:0 14px 10px 0; border-bottom:2px solid var(--ink);
+  }
+  td{
+    font-size:14px; padding:12px 14px 12px 0; border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  td.cat{font-weight:700; width:38%;}
+
+  .callout{
+    background:var(--panel); border-left:3px solid var(--accent);
+    padding:16px 20px; margin:24px 0; font-size:15.5px;
+  }
+  .callout b{color:var(--accent);}
+
+  .pattern{
+    background:var(--red-bg); border-left:3px solid var(--red);
+    padding:18px 20px; margin:22px 0;
+  }
+  .pattern .label{
+    font-family:Arial,Helvetica,sans-serif; font-size:11px; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:8px;
+  }
+  .pattern p{font-size:15px; margin-bottom:0;}
+
+  /* diagrama iceberg */
+  .diagram{margin:28px 0 8px 0;}
+  .diagram-caption{
+    font-family:Arial,Helvetica,sans-serif; font-size:11.5px; color:var(--muted);
+    text-align:center; margin-top:8px;
+  }
+
+  .closing{
+    margin-top:44px; padding-top:24px; border-top:1px solid var(--line);
+    font-size:17px; color:var(--ink);
+  }
+  .closing .sign{
+    font-family:Arial,Helvetica,sans-serif; font-size:12px; color:var(--muted);
+    margin-top:20px; letter-spacing:0.3px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Gacetilla técnica · Precomisionado &amp; comisionado</div>
+  <h1>El costo real de un arranque tardío</h1>
+  <p class="deck">Cada día de atraso en el arranque tiene un costo que rara vez se mide a tiempo. Un repaso de por qué conviene anticiparlo.</p>
+
+  <p class="lead">Cuando un arranque se corre unos días, lo primero que se contabiliza es lo más visible: una cuadrilla que sigue en obra, un equipo alquilado que hay que extender, algunas horas extra de supervisión. Ese es el costo que entra en el informe. El que realmente pesa suele quedar afuera, precisamente porque no aparece en ninguna planilla hasta que ya es demasiado tarde para actuar sobre él.</p>
+
+  <h2>Lo que se ve</h2>
+  <p>Es el costo directo del atraso: todo lo que sigue facturando mientras el sistema no arranca.</p>
+  <table>
+    <tr><th>Concepto</th><th>Por qué crece con cada día</th></tr>
+    <tr><td class="cat">Personal contratista</td><td>Cuadrillas y supervisión permanecen en obra más allá de lo previsto en el contrato.</td></tr>
+    <tr><td class="cat">Equipos y alquileres</td><td>Grúas, generadores, unidades de prueba y equipos especiales extienden su locación.</td></tr>
+    <tr><td class="cat">Logística</td><td>Alojamiento, traslados y viáticos de cuadrillas que iban a estar desmovilizadas.</td></tr>
+    <tr><td class="cat">Gestión</td><td>Horas adicionales de coordinación, replanificación y seguimiento del atraso.</td></tr>
+  </table>
+
+  <h2>Lo que no se ve</h2>
+  <p>Es el costo indirecto — normalmente varias veces mayor que el anterior, y el que casi nunca se anticipa porque no tiene una línea propia en ningún presupuesto.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 300" width="100%" style="max-width:640px; display:block; margin:0 auto;">
+      <!-- linea de flotacion -->
+      <line x1="0" y1="110" x2="640" y2="110" stroke="#b9862a" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <text x="8" y="102" font-family="Arial" font-size="10" fill="#b9862a" letter-spacing="1">LÍNEA DE FLOTACIÓN — LO QUE SE MIDE HOY</text>
+
+      <!-- punta del iceberg -->
+      <polygon points="290,20 350,20 320,110" fill="#e9dcc3" stroke="#b9862a" stroke-width="1.5"/>
+      <text x="320" y="60" font-family="Arial" font-size="11" fill="#5c6577" text-anchor="middle">Costo</text>
+      <text x="320" y="74" font-family="Arial" font-size="11" fill="#5c6577" text-anchor="middle">directo</text>
+
+      <!-- masa sumergida -->
+      <polygon points="60,110 580,110 460,290 180,290" fill="#f3e9d6" stroke="#b9862a" stroke-width="1.5"/>
+
+      <text x="320" y="150" font-family="Arial" font-size="13" font-weight="bold" fill="#3a3226" text-anchor="middle">Producción diferida</text>
+      <text x="320" y="178" font-family="Arial" font-size="13" font-weight="bold" fill="#3a3226" text-anchor="middle">Capital inmovilizado sin producir</text>
+      <text x="320" y="206" font-family="Arial" font-size="13" font-weight="bold" fill="#3a3226" text-anchor="middle">Efecto cascada sobre otros pozos o sistemas</text>
+      <text x="320" y="234" font-family="Arial" font-size="13" font-weight="bold" fill="#3a3226" text-anchor="middle">Cláusulas contractuales por fecha</text>
+      <text x="320" y="262" font-family="Arial" font-size="13" font-weight="bold" fill="#3a3226" text-anchor="middle">Desgaste de la relación con el operador</text>
+    </svg>
+    <div class="diagram-caption">La parte visible de un atraso es la más chica. El grueso del costo está debajo de lo que se suele medir.</div>
+  </div>
+
+  <ul>
+    <li><strong>Producción diferida:</strong> cada día sin arrancar es un día sin el ingreso que ese sistema estaba diseñado para generar. No se recupera corriendo el calendario — se pierde.</li>
+    <li><strong>Capital inmovilizado:</strong> el activo ya está construido y pagado. Mientras no produce, ese capital no está rindiendo nada.</li>
+    <li><strong>Efecto cascada:</strong> en un desarrollo con varios pozos o sistemas, un atraso puntual puede correr la fecha de los siguientes si comparten cuadrillas, equipos o ventanas de intervención.</li>
+    <li><strong>Cláusulas contractuales:</strong> muchos contratos EPC o de servicios atan penalidades a la fecha de arranque, no al esfuerzo invertido en llegar a tiempo.</li>
+    <li><strong>Relación con el operador:</strong> una fecha que se corre una vez se explica. Si se corre dos o tres veces, lo que se pierde es la confianza en la próxima estimación.</li>
+  </ul>
+
+  <h2>Por qué el atraso se descubre tarde</h2>
+  <p>El problema rara vez es la falta de trabajo — es la falta de visibilidad sobre qué trabajo puntual está frenando todo lo demás.</p>
+
+  <div class="pattern">
+    <div class="label">Un patrón habitual</div>
+    <p>Un ítem de punch list categoría A queda pendiente en un sistema. Nadie lo marca como bloqueante porque, en la planilla semanal, es una línea más entre cientos. Diez días después, cuando se arma el paquete para pedir el certificado de arranque, aparece como el único punto que falta cerrar — y ya no hay margen para resolverlo sin correr la fecha.</p>
+  </div>
+
+  <p>Lo que hace tarde visible al atraso no es la cantidad de tareas pendientes, sino la demora entre que algo se completa en el campo y ese dato llega a quien tiene que decidir. Mientras esa demora se mida en días, el atraso se detecta cuando ya es un problema — no cuando todavía era una alerta.</p>
+
+  <h2>Qué cambia con visibilidad en tiempo real</h2>
+  <table>
+    <tr><th></th><th>Reporte diferido</th><th>Visibilidad en tiempo real</th></tr>
+    <tr><td class="cat">Avance por sistema</td><td>Se conoce al cierre de la semana</td><td>Se conoce al momento en que se completa la tarea</td></tr>
+    <tr><td class="cat">Qué bloquea el certificado</td><td>Se descubre armando el paquete final</td><td>Es visible desde el primer día</td></tr>
+    <tr><td class="cat">Punch list crítico</td><td>Se mezcla con el resto en una planilla larga</td><td>Queda identificado como bloqueante de inmediato</td></tr>
+    <tr><td class="cat">Corrección de rumbo</td><td>Cuando ya no hay margen de fecha</td><td>Mientras todavía hay margen de fecha</td></tr>
+  </table>
+
+  <div class="callout">
+    La diferencia entre anticipar un atraso y sufrirlo no está en trabajar más rápido — está en <b>enterarse a tiempo</b> de qué es lo que realmente está frenando el arranque.
+  </div>
+
+  <div class="closing">
+    <p>El costo de un arranque tardío no se genera el día que se corre la fecha: se acumula en cada jornada en que nadie tuvo, a tiempo, la información necesaria para actuar. Anticiparlo no depende de trabajar más rápido sobre el final, sino de tener trazabilidad real desde el primer chequeo hasta el último certificado.</p>
+    <div class="sign">Gestión de precomisionado y comisionado — Oil &amp; Gas</div>
+  </div>
+
+</div>
+</body>
+</html>
